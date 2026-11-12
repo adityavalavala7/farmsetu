@@ -6,3 +6,4 @@ python-dotenv==1.2.4
 Pillow==13.0.0
 cloudinary==1.47.0
 django-cloudinary-storage==0.3.0
+whitenoise
