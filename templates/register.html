@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Join FarmSetu{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .register-wrapper {
+        min-height: calc(100vh - 160px);
+        display: flex; justify-content: center; align-items: center;
+        padding: 40px 20px;
+        background-color: #faf9f3;
+        background-image: url("/static/images/reg-log-background.png");
+        background-repeat: no-repeat; background-position: center; background-size: cover;
+    }
+    .register-card {
+        width: 100%; max-width: 480px;
+        background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+        padding: 35px; border-radius: 20px;
+        box-shadow: 0 16px 45px rgba(0,0,0,0.12);
+    }
+    .register-card h1 { color: #236B45; font-size: 30px; margin: 0 0 10px; font-family: 'Playfair Display', serif; }
+    .register-card p { color: #68736b; line-height: 1.6; margin-bottom: 25px; }
+    .register-card label { display: block; font-weight: 600; font-size: 14px; margin: 16px 0 7px; }
+    .register-card input, .register-card select {
+        display: block; width: 100%; padding: 13px 14px;
+        border: 1px solid #d9e2da; border-radius: 9px; background: #fff;
+        font-size: 15px; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .register-card input:focus, .register-card select:focus {
+        border-color: #236B45; box-shadow: 0 0 0 3px rgba(35,107,69,0.10);
+    }
+    .register-card button {
+        width: 100%; margin-top: 25px; padding: 15px; border: none;
+        border-radius: 9px; background: #236B45; color: white;
+        font-size: 16px; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .register-card button:hover { background: #195536; }
+    .register-footer { text-align: center; margin-top: 22px; font-size: 14px; }
+    .register-footer a { color: #236B45; font-weight: 700; text-decoration: none; }
+    .form-error { background: #ffe8e8; color: #b42318; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
+    .form-success { background: #e8f5e9; color: #236B45; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
+    @media (max-width: 600px) {
+        .register-card { padding: 25px 20px; }
+        .register-card h1 { font-size: 26px; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="register-wrapper">
+        <div class="register-card">
+            <h1>Join FarmSetu 🌱</h1>
+            <p>Create your account and connect directly with your local community.</p>
+            {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+            {% if success %}<div class="form-success">{{ success }}</div>{% endif %}
+            <form method="POST">
+                {% csrf_token %}
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+                <label for="phone">Phone number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+
+                <label for="role">I want to join as</label>
+                <select id="role" name="role" required>
+                    <option value="">Select account type</option>
+                    <option value="CUSTOMER">Customer</option>
+                    <option value="FARMER">Farmer</option>
+                </select>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required>
+
+                <label for="confirm_password">Confirm password</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+
+                <button type="submit">Create Account</button>
+            </form>
+
+            <div class="register-footer">
+                Already have an account?
+                <a href="/accounts/login/">Login</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

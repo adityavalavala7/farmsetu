@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}My Farm Profile | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 1050px; margin: 40px auto; padding: 0 20px; }
+    .heading { margin-bottom: 28px; }
+    .heading h1 { font-family: 'Playfair Display', serif; font-size: 34px; margin-bottom: 8px; color: #236B45; }
+    .heading p { color: #747D76; }
+    .profile-card { background: white; border: 1px solid #E7E9E1; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.035); }
+    .cover { height: 145px; background: linear-gradient(120deg, #236B45, #73A942); }
+    .profile-content { padding: 0 35px 35px; }
+    .profile-photo-wrapper { margin-top: -65px; margin-bottom: 25px; }
+    .profile-photo { width: 125px; height: 125px; border-radius: 50%; border: 5px solid white; object-fit: cover; background: #E8F0E5; }
+    .photo-placeholder { display: flex; align-items: center; justify-content: center; color: #236B45; font-size: 45px; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 20px; color: #236B45; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .field { margin-bottom: 20px; }
+    .field.full { grid-column: 1 / -1; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 9px; }
+    input, textarea { width: 100%; padding: 13px 15px; border: 1px solid #E7E9E1; border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; background: #FEFEFC; transition: border-color .2s, box-shadow .2s; }
+    input:focus, textarea:focus { border-color: #236B45; box-shadow: 0 0 0 3px rgba(35,107,69,0.08); }
+    textarea { resize: vertical; }
+    .help-text { font-size: 12px; color: #747D76; margin-top: 7px; }
+    .location-box { margin-top: 25px; padding: 22px; background: #F5F7EF; border-radius: 14px; }
+    .location-box h3 { color: #236B45; margin-bottom: 15px; }
+    .location-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+    .location-item { font-size: 14px; }
+    .location-item strong { display: block; margin-bottom: 5px; }
+    .location-item span { color: #747D76; }
+    .button-row { display: flex; justify-content: flex-end; margin-top: 30px; gap: 12px; }
+    .save-btn { border: none; background: #236B45; color: white; padding: 14px 27px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .save-btn:hover { background: #194F32; }
+    .messages { margin-bottom: 20px; }
+    .message { padding: 13px 16px; background: #E8F4EA; color: #236B45; border-radius: 10px; margin-bottom: 8px; }
+    .errors { color: #B42318; font-size: 13px; margin-top: 6px; }
+    @media(max-width: 650px) { .form-grid, .location-grid { grid-template-columns: 1fr; } .profile-content { padding: 0 20px 25px; } .heading h1 { font-size: 28px; } .container { margin-top: 25px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <div class="heading">
+            <h1>My Farm Profile</h1>
+            <p>Introduce your farm to customers and keep your details updated.</p>
+        </div>
+        {% if messages %}
+        <div class="messages">{% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}</div>
+        {% endif %}
+        <div class="profile-card">
+            <div class="cover"></div>
+            <div class="profile-content">
+                <div class="profile-photo-wrapper">
+                    {% if farmer.profile_photo %}
+                        <img src="{{ farmer.profile_photo.url }}" class="profile-photo" id="photoPreview" alt="Farm profile photo">
+                    {% else %}
+                        <div class="profile-photo photo-placeholder" id="photoPlaceholder">🌾</div>
+                        <img src="" class="profile-photo" id="photoPreview" alt="Farm profile photo preview" style="display:none;">
+                    {% endif %}
+                </div>
+                <h2 class="section-title">Farm Information</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label for="{{ form.farm_name.id_for_label }}">Farm Name</label>
+                            {{ form.farm_name }}
+                            {% for error in form.farm_name.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="field full">
+                            <label for="{{ form.farm_description.id_for_label }}">About Your Farm</label>
+                            {{ form.farm_description }}
+                            {% for error in form.farm_description.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="field full">
+                            <label for="{{ form.profile_photo.id_for_label }}">Farm Profile Photo</label>
+                            {{ form.profile_photo }}
+                            <p class="help-text">Upload a clear photo of yourself, your farm or your produce.</p>
+                            {% for error in form.profile_photo.errors %}<div class="errors">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+                    <div class="location-box">
+                        <h3>📍 Farm Location</h3>
+                        <div class="location-grid">
+                            <div class="location-item"><strong>Village</strong><span>{{ farmer.village|default:"Not added" }}</span></div>
+                            <div class="location-item"><strong>Mandal</strong><span>{{ farmer.mandal|default:"Not added" }}</span></div>
+                            <div class="location-item"><strong>District</strong><span>{{ farmer.district|default:"Not added" }}</span></div>
+                            <div class="location-item"><strong>Pincode</strong><span>{{ farmer.pincode|default:"Not added" }}</span></div>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button type="submit" class="save-btn">Save Farm Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const photoInput = document.getElementById("id_profile_photo");
+    const photoPreview = document.getElementById("photoPreview");
+    const photoPlaceholder = document.getElementById("photoPlaceholder");
+    if (photoInput) {
+        photoInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (file && file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    photoPreview.src = event.target.result;
+                    photoPreview.style.display = "block";
+                    if (photoPlaceholder) { photoPlaceholder.style.display = "none"; }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+</script>
+{% endblock %}

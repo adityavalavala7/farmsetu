@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Manage Inventory | FarmSetu{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    .heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; }
+    h1 { color: #236B45; font-family: 'Playfair Display', serif; }
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .inventory-card { background: white; padding: 22px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #EAECE4; }
+    .inventory-card h3 { margin-top: 0; color: #236B45; }
+    .stock-form { display: flex; gap: 8px; margin: 15px 0; }
+    input { width: 100%; min-width: 0; padding: 11px; border: 1px solid #ddd; border-radius: 7px; box-sizing: border-box; font: inherit; }
+    button, .back-link { border: none; padding: 11px 15px; border-radius: 7px; cursor: pointer; text-decoration: none; font-weight: bold; transition: opacity .2s; }
+    .update-btn { background: #236B45; color: white; }
+    .toggle-btn { width: 100%; background: #E8F2E9; color: #236B45; }
+    .back-link { background: #236B45; color: white; display: inline-block; }
+    .available { color: #236B45; font-weight: bold; }
+    .unavailable { color: #C0392B; font-weight: bold; }
+    .messages { padding: 12px; background: #E8F2E9; border-radius: 8px; margin-bottom: 20px; color: #237342; }
+    .empty { background: white; padding: 30px; border-radius: 12px; text-align: center; border: 1px solid #e8eadf; }
+    .empty h3 { color: #236B45; }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="heading">
+            <div>
+                <h1>Manage Inventory</h1>
+                <p>Update your crop stock and availability.</p>
+            </div>
+            <a href="{% url 'farmer_dashboard' %}" class="back-link">Back to Dashboard</a>
+        </div>
+        {% if messages %}{% for message in messages %}<div class="messages">{{ message }}</div>{% endfor %}{% endif %}
+        {% if crops %}
+            <div class="inventory-grid">
+                {% for crop in crops %}
+                    <div class="inventory-card">
+                        <h3>{{ crop.name }}</h3>
+                        <p>Category: {{ crop.get_category_display }}</p>
+                        <p>Price: ₹{{ crop.price }} / {% if crop.unit == "KG" %}kg{% else %}100g{% endif %}</p>
+                        <p>Current Stock: <strong>{{ crop.quantity|floatformat:0 }} {% if crop.unit == "KG" %}kg{% else %}g{% endif %}</strong></p>
+                        <p>Status: {% if crop.is_available %}<span class="available">Available</span>{% else %}<span class="unavailable">Unavailable</span>{% endif %}</p>
+                        <form method="POST" class="stock-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="crop_id" value="{{ crop.id }}">
+                            <input type="hidden" name="action" value="update_stock">
+                            <input type="number" name="quantity" min="0" step="1" value="{{ crop.quantity|floatformat:0 }}" required>
+                            <button type="submit" class="update-btn">Update</button>
+                        </form>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="crop_id" value="{{ crop.id }}">
+                            <input type="hidden" name="action" value="toggle_availability">
+                            <button type="submit" class="toggle-btn">{% if crop.is_available %}Mark Unavailable{% else %}Mark Available{% endif %}</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty">
+                <h3>No crops listed yet</h3>
+                <p>Add your first crop to manage its inventory here.</p>
+                <a href="{% url 'add_crop' %}" class="back-link">Add Crop</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

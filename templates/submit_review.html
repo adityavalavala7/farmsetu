@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Write a Review | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 650px; margin: 40px auto; padding: 0 22px; }
+    .back-link { display: inline-block; color: #236B45; text-decoration: none; font-weight: 700; margin-bottom: 25px; }
+    .review-card { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+    h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: #236B45; margin-bottom: 10px; }
+    .subtitle { color: #777; margin-bottom: 28px; line-height: 1.6; }
+    .crop-info { background: #F2F7EF; border-radius: 12px; padding: 18px; margin-bottom: 28px; }
+    .crop-info h3 { color: #236B45; margin-bottom: 7px; }
+    .crop-info p { color: #666; font-size: 14px; margin-top: 5px; }
+    .form-group { margin-bottom: 23px; }
+    label { display: block; font-weight: 700; margin-bottom: 10px; }
+    .form-control { width: 100%; padding: 13px; border: 1px solid #DCE5DC; border-radius: 9px; background: white; font-family: inherit; font-size: 15px; }
+    textarea.form-control { resize: vertical; }
+    .form-control:focus { outline: none; border-color: #236B45; box-shadow: 0 0 0 3px rgba(35,107,69,0.1); }
+    .submit-btn { width: 100%; padding: 15px; border: none; border-radius: 10px; background: #236B45; color: white; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .2s; }
+    .submit-btn:hover { background: #194F32; }
+    .notice { text-align: center; color: #777; font-size: 13px; margin-top: 18px; }
+    .errorlist { color: #B42318; margin: 8px 0; padding-left: 20px; }
+    @media(max-width: 600px) { .review-card { padding: 23px; } h1 { font-size: 27px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <a href="{% url 'my_orders' %}" class="back-link">← Back to My Orders</a>
+        <div class="review-card">
+            <h1>Share Your Experience</h1>
+            <p class="subtitle">Your feedback helps other customers discover quality farmers and fresh produce.</p>
+            <div class="crop-info">
+                <h3>{{ order_item.crop_name }}</h3>
+                <p>Farmer: {{ order_item.farmer.farm_name|default:order_item.farmer.username }}</p>
+                <p>Quantity: {{ order_item.quantity }} {{ order_item.get_unit_display }}</p>
+                <p>Order #{{ order_item.order.id }}</p>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>⭐ Rate the Farmer</label>
+                    {{ form.farmer_rating }}
+                    {{ form.farmer_rating.errors }}
+                </div>
+                <div class="form-group">
+                    <label>🌾 Rate the Crop</label>
+                    {{ form.crop_rating }}
+                    {{ form.crop_rating.errors }}
+                </div>
+                <div class="form-group">
+                    <label>💬 Your Feedback (Optional)</label>
+                    {{ form.comment }}
+                    {{ form.comment.errors }}
+                </div>
+                <button type="submit" class="submit-btn">Submit Review</button>
+            </form>
+            <p class="notice">Reviews are permanent and cannot be edited or deleted.</p>
+        </div>
+    </main>
+{% endblock %}

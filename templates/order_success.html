@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Order Confirmed | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 600px; margin: 50px auto; padding: 35px; background: white; border-radius: 16px; text-align: center; border: 1px solid #e8eadf; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+    .success-icon { width: 75px; height: 75px; line-height: 75px; margin: 0 auto 20px; border-radius: 50%; background: #e7f4e8; color: #236B45; font-size: 40px; }
+    h1 { font-family: 'Playfair Display', serif; color: #236B45; }
+    .details { margin: 25px 0; padding: 20px; background: #FAF9F3; border-radius: 10px; text-align: left; }
+    .details p { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; }
+    .amount { color: #236B45; font-size: 22px; font-weight: bold; }
+    .btn { display: inline-block; padding: 14px 25px; background: #236B45; color: white; text-decoration: none; border-radius: 8px; margin-top: 15px; font-weight: 700; }
+    .btn:hover { background: #194F32; }
+    .note { color: #68716B; font-size: 14px; line-height: 1.6; }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <div class="success-icon">✓</div>
+        <h1>Order Placed Successfully!</h1>
+        <p>Thank you for choosing FarmSetu.</p>
+        <div class="details">
+            <p><strong>Order ID</strong><span>#{{ order.id }}</span></p>
+            <p><strong>Payment Method</strong><span>{{ order.get_payment_method_display }}</span></p>
+            <p><strong>Payment Status</strong><span>{{ order.get_payment_status_display }}</span></p>
+            <p><strong>Fulfilment</strong><span>{{ order.get_delivery_method_display }}</span></p>
+            <hr>
+            <p><strong>Total Amount</strong><span class="amount">₹{{ order.total_amount }}</span></p>
+        </div>
+        {% if order.payment_method == "ONLINE" %}
+            <p class="note">Your order has been created, but online payment is not integrated yet. Your payment status will remain pending until the payment gateway confirms it.</p>
+        {% else %}
+            <p class="note">Please pay when your order is delivered or when you collect it from the farmer.</p>
+        {% endif %}
+        <a href="{% url 'customer_dashboard' %}" class="btn">Back to Dashboard</a>
+    </main>
+{% endblock %}

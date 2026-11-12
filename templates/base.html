@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FarmSetu | From Farm to Family{% endblock %}</title>
+    <meta name="description" content="Discover fresh produce from farmers near you. Buy directly from local farmers with FarmSetu.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/ui.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="brand">
+            <img src="{% static 'images/farmsetu-logo.png' %}" alt="FarmSetu logo" class="brand-logo">
+            <span>Farm<span class="brand-green">Setu</span></span>
+        </a>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="/">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                {% if user.role == "CUSTOMER" %}
+                    <a href="{% url 'explore_crops' %}">Explore</a>
+                    <a href="{% url 'view_cart' %}">Cart</a>
+                    <a href="{% url 'my_orders' %}">Orders</a>
+                {% elif user.role == "FARMER" %}
+                    <a href="{% url 'my_listings' %}">Listings</a>
+                    <a href="{% url 'farmer_orders' %}">Orders</a>
+                    <a href="{% url 'manage_inventory' %}">Inventory</a>
+                {% endif %}
+            {% else %}
+                <a href="#categories">Categories</a>
+                <a href="#how-it-works">How it works</a>
+            {% endif %}
+        </nav>
+
+        <div class="nav-actions">
+            {% if user.is_authenticated %}
+                <div class="account-menu">
+                    <button type="button" class="account-toggle" id="accountToggle" aria-haspopup="true" aria-expanded="false">
+                        👤 {{ user.username }} ▾
+                    </button>
+                    <div class="account-dropdown" id="accountDropdown">
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                        {% if user.role == "FARMER" %}
+                            <a href="{% url 'farmer_profile' %}">Farm Profile</a>
+                            <a href="{% url 'farmer_location' %}">Farm Location</a>
+                        {% elif user.role == "CUSTOMER" %}
+                            <a href="{% url 'my_orders' %}">My Orders</a>
+                            <a href="{% url 'customer_location' %}">My Location</a>
+                        {% endif %}
+                        <form method="POST" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-button">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <a href="/accounts/login/" class="login-link">Login</a>
+                <a href="/accounts/register/" class="nav-button">Get started</a>
+            {% endif %}
+        </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+    </header>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+        <div class="footer-main">
+            <div>
+                <a href="/" class="brand footer-brand">
+                    <img src="{% static 'images/farmsetu-logo.png' %}" alt="FarmSetu logo" class="brand-logo">
+                    Farm<span class="brand-green">Setu</span>
+                </a>
+                <p>Connecting farms and families.<br>Building a fairer local food marketplace.</p>
+            </div>
+            <div>
+                <h4>Explore</h4>
+                <a href="/">Home</a>
+                <a href="#categories">Categories</a>
+                <a href="#how-it-works">How it works</a>
+            </div>
+            <div>
+                <h4>Get started</h4>
+                <a href="/accounts/login/">Customer login</a>
+                <a href="/accounts/register/">Farmer registration</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2026 FarmSetu. From Farm to Family.
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById("menuToggle");
+        const navLinks = document.getElementById("navLinks");
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener("click", () => navLinks.classList.toggle("show"));
+        }
+        const accountToggle = document.getElementById("accountToggle");
+        const accountDropdown = document.getElementById("accountDropdown");
+        if (accountToggle && accountDropdown) {
+            accountToggle.addEventListener("click", (e) => {
+                e.stopPropagation();
+                accountDropdown.classList.toggle("show");
+                accountToggle.setAttribute("aria-expanded", accountDropdown.classList.contains("show"));
+            });
+            document.addEventListener("click", (e) => {
+                if (!accountDropdown.contains(e.target) && e.target !== accountToggle) {
+                    accountDropdown.classList.remove("show");
+                    accountToggle.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

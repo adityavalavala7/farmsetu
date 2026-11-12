@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Login | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .login-wrapper {
+        min-height: calc(100vh - 160px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        background-color: #faf9f3;
+        background-image: url("/static/images/reg-log-background.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+        border-radius: 0;
+    }
+    .login-card {
+        width: 100%;
+        max-width: 450px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.12);
+    }
+    .login-card h1 { color: #236B45; font-size: 30px; margin: 0 0 10px; font-family: 'Playfair Display', serif; }
+    .login-card p { color: #68736b; line-height: 1.6; margin-bottom: 25px; }
+    .login-card label { display: block; font-weight: 600; font-size: 14px; margin: 18px 0 8px; }
+    .login-card input {
+        display: block; width: 100%; padding: 14px;
+        border: 1px solid #d9e2da; border-radius: 9px;
+        background: #fff; font-size: 15px; outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .login-card input:focus { border-color: #236B45; box-shadow: 0 0 0 3px rgba(35,107,69,0.12); }
+    .login-card button {
+        width: 100%; margin-top: 28px; padding: 15px; border: none;
+        border-radius: 9px; background: #236B45; color: white;
+        font-size: 16px; font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .login-card button:hover { background: #195536; }
+    .login-footer { text-align: center; margin-top: 22px; font-size: 14px; }
+    .login-footer a { color: #236B45; font-weight: 700; text-decoration: none; }
+    .form-error { background: #ffe8e8; color: #b42318; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; }
+    @media (max-width: 600px) {
+        .login-card { padding: 28px 22px; }
+        .login-card h1 { font-size: 26px; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="login-wrapper">
+        <div class="login-card">
+            <h1>Welcome Back 🌱</h1>
+            <p>Login to FarmSetu and connect with your local farming community.</p>
+
+            {% if error %}
+            <div class="form-error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your registered phone number"
+                    pattern="[0-9]{10}" maxlength="10" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+                <button type="submit">Login to FarmSetu</button>
+            </form>
+
+            <div class="login-footer">
+                Don't have an account?
+                <a href="/accounts/register/">Create Account</a>
+            </div>
+            <div class="login-footer">
+                <a href="/">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

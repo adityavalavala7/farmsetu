@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Set Your Location | FarmSetu{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .location-container { max-width: 650px; margin: 55px auto; padding: 35px; background: white; border-radius: 18px; box-shadow: 0 8px 30px rgba(0,0,0,.07); border: 1px solid #e8eadf; }
+    h1 { color: #236B45; margin-bottom: 8px; font-family: 'Playfair Display', serif; }
+    .subtitle { color: #68736D; margin-bottom: 28px; }
+    label { display: block; font-weight: 600; margin: 17px 0 7px; }
+    input { box-sizing: border-box; width: 100%; padding: 13px; border: 1px solid #D9DFD9; border-radius: 9px; font-size: 15px; font: inherit; }
+    input:focus { outline: 2px solid #73A942; border-color: #236B45; }
+    .gps-button, .save-button { width: 100%; padding: 14px; margin-top: 18px; border: 0; border-radius: 9px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .gps-button { background: #EAF3E9; color: #236B45; }
+    .gps-button:hover { background: #dcecdf; }
+    .save-button { background: #236B45; color: white; }
+    .save-button:hover { background: #195536; }
+    .privacy { margin-top: 20px; padding: 13px; background: #F3F7EF; border-radius: 9px; color: #526454; font-size: 13px; line-height: 1.6; }
+    #gps-status { margin-top: 10px; font-size: 13px; color: #236B45; }
+    .messages { padding: 12px; background: #FFF4D9; border-radius: 8px; margin-bottom: 15px; }
+    @media(max-width: 700px) { .location-container { margin: 20px 12px; padding: 24px 18px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="location-container">
+        <h1>Set Your Location</h1>
+        <p class="subtitle">Help FarmSetu find fresh produce and farmers near you.</p>
+        {% if messages %}{% for message in messages %}<div class="messages">{{ message }}</div>{% endfor %}{% endif %}
+        <form method="POST">
+            {% csrf_token %}
+            <label for="village">Village / Area</label>
+            <input type="text" id="village" name="village" value="{{ request.user.village }}" required>
+            <label for="mandal">Mandal</label>
+            <input type="text" id="mandal" name="mandal" value="{{ request.user.mandal }}" required>
+            <label for="district">District</label>
+            <input type="text" id="district" name="district" value="{{ request.user.district }}" required>
+            <label for="pincode">PIN Code</label>
+            <input type="text" id="pincode" name="pincode" value="{{ request.user.pincode }}" maxlength="6" pattern="[0-9]{6}" required>
+            <button type="button" class="gps-button" onclick="getLocation()">📍 Use My Current GPS Location</button>
+            <p id="gps-status" aria-live="polite">GPS location has not been captured yet.</p>
+            <input type="hidden" name="latitude" id="latitude" value="{{ request.user.latitude|default_if_none:'' }}">
+            <input type="hidden" name="longitude" id="longitude" value="{{ request.user.longitude|default_if_none:'' }}">
+            <div class="privacy">🔒 Your exact GPS coordinates are kept private. FarmSetu uses your location to help find nearby farmers.</div>
+            <button type="submit" class="save-button">Save My Location</button>
+        </form>
+    </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    function getLocation() {
+        const status = document.getElementById("gps-status");
+        if (!navigator.geolocation) { status.textContent = "GPS is not supported by this browser."; return; }
+        status.textContent = "Getting your location...";
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                document.getElementById("latitude").value = position.coords.latitude;
+                document.getElementById("longitude").value = position.coords.longitude;
+                status.textContent = "✓ GPS location captured successfully!";
+            },
+            function (error) { status.textContent = "Unable to get GPS location. Please allow location access and try again."; },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}FarmSetu | From Farm to Family{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+{% block content %}
+    <main>
+        <!-- Hero section -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <span class="eyebrow">🌱 GROW LOCAL. BUY LOCAL.</span>
+
+                <h1>Fresh from farms.<br>
+                    <span>Direct to you.</span>
+                </h1>
+
+                <p>
+                    Discover local farmers, explore fresh produce
+                    and enjoy fair prices. A better connection
+                    between farms and families.
+                </p>
+
+                <div class="location-search">
+                    <div class="location-field">
+                        <span>📍</span>
+                        <div>
+                            <small>YOUR LOCATION</small>
+                            <strong>Bhimavaram, Andhra Pradesh</strong>
+                        </div>
+                    </div>
+                    <a href="/marketplace/explore/" class="search-button">Explore produce →</a>
+                </div>
+
+                <div class="hero-links">
+                    <a href="/marketplace/explore/">🛒 Shop produce</a>
+                    <a href="/accounts/register/">🌾 Sell your crops</a>
+                </div>
+            </div>
+
+            <div class="hero-image">
+                <img
+                    src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1000"
+                    alt="Fresh vegetables at a farmers market">
+                <div class="image-tag">
+                    <span class="tag-icon">🌱</span>
+                    <div>
+                        <strong>Fresh & local</strong>
+                        <small>Direct from farmers</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits strip -->
+        <section class="benefits">
+            <div class="benefit">
+                <span>🤝</span>
+                <div>
+                    <strong>Direct connection</strong>
+                    <small>Connect with local farmers</small>
+                </div>
+            </div>
+            <div class="benefit">
+                <span>💰</span>
+                <div>
+                    <strong>Fair prices</strong>
+                    <small>Better value for everyone</small>
+                </div>
+            </div>
+            <div class="benefit">
+                <span>📍</span>
+                <div>
+                    <strong>Near your location</strong>
+                    <small>Discover nearby produce</small>
+                </div>
+            </div>
+            <div class="benefit">
+                <span>🚚</span>
+                <div>
+                    <strong>Flexible fulfilment</strong>
+                    <small>Pickup or delivery</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="section categories-section" id="categories">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">EXPLORE THE MARKET</span>
+                    <h2>Shop by category</h2>
+                    <p>Find the fresh produce you're looking for.</p>
+                </div>
+                <a href="/marketplace/explore/" class="text-link">View all →</a>
+            </div>
+
+            <div class="category-grid">
+                <a href="/marketplace/explore/?category=vegetables" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600" alt="Fresh vegetables">
+                    <div class="category-info">
+                        <h3>Vegetables</h3>
+                        <span>Explore vegetables →</span>
+                    </div>
+                </a>
+
+                <a href="/marketplace/explore/?category=fruits" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=600" alt="Fresh fruits">
+                    <div class="category-info">
+                        <h3>Fruits</h3>
+                        <span>Explore fruits →</span>
+                    </div>
+                </a>
+
+                <a href="/marketplace/explore/?category=grains" class="category-card">
+                    <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600" alt="Grains and pulses">
+                    <div class="category-info">
+                        <h3>Grains & Pulses</h3>
+                        <span>Explore grains →</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Nearby farmers -->
+        <section class="nearby-section">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">YOUR LOCAL MARKETPLACE</span>
+                    <h2>Farmers near you</h2>
+                    <p>Discover produce from farms around Bhimavaram.</p>
+                </div>
+                <span class="coming-soon">Listings coming soon</span>
+            </div>
+
+            <div class="empty-market">
+                <span>🌾</span>
+                <h3>Your local marketplace starts here</h3>
+                <p>We're preparing FarmSetu for farmers and customers in Bhimavaram.</p>
+                <a href="/accounts/register/" class="primary-button">Join FarmSetu</a>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="section how-section" id="how-it-works">
+            <div class="center-heading">
+                <span class="eyebrow">SIMPLE AND TRANSPARENT</span>
+                <h2>How FarmSetu works</h2>
+                <p>From the farmer's field to your home in a few simple steps.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-icon">🌾</div>
+                    <span class="step-number">01</span>
+                    <h3>Farmers list produce</h3>
+                    <p>Farmers add their crops, prices and available quantities.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">🔍</div>
+                    <span class="step-number">02</span>
+                    <h3>Customers discover</h3>
+                    <p>Browse local produce and compare prices from nearby farmers.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">🛒</div>
+                    <span class="step-number">03</span>
+                    <h3>Place an order</h3>
+                    <p>Select your quantity and choose pickup or delivery.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">🤝</div>
+                    <span class="step-number">04</span>
+                    <h3>Connect directly</h3>
+                    <p>Receive fresh produce while supporting local farmers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Farmer call to action -->
+        <section class="farmer-cta" id="about">
+            <div>
+                <span class="eyebrow">FOR OUR FARMERS</span>
+                <h2>Are you a farmer?</h2>
+                <p>Reach more customers, sell your crops directly and get better opportunities through FarmSetu.</p>
+                <a href="/accounts/register/" class="cta-button">Start selling with FarmSetu →</a>
+            </div>
+            <div class="cta-emoji">🚜🌾</div>
+        </section>
+    </main>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}My Earnings | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 1200px; margin: 40px auto; padding: 0 22px; }
+    .page-heading { margin-bottom: 28px; }
+    .page-heading h1 { font-family: 'Playfair Display', serif; font-size: 34px; margin-bottom: 8px; color: #236B45; }
+    .page-heading p { color: #747D76; }
+    .commission-note { background: #EDF4E9; color: #236B45; padding: 15px 18px; border-radius: 12px; margin-bottom: 25px; font-size: 14px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 35px; }
+    .stat-card { background: white; padding: 24px; border: 1px solid #E7E9E1; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.025); }
+    .stat-card p { color: #747D76; font-size: 14px; margin-bottom: 12px; }
+    .stat-card h2 { font-size: 27px; color: #236B45; overflow-wrap: anywhere; }
+    .stat-card small { display: block; color: #747D76; margin-top: 8px; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 25px; margin-bottom: 18px; color: #236B45; }
+    .table-wrapper { background: white; border: 1px solid #E7E9E1; border-radius: 16px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    th, td { padding: 17px 19px; text-align: left; border-bottom: 1px solid #E7E9E1; font-size: 14px; }
+    th { background: #F3F5ED; color: #236B45; font-weight: 700; }
+    tr:last-child td { border-bottom: none; }
+    .paid { color: #236B45; background: #E8F4EA; padding: 6px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .pending { color: #9A6500; background: #FFF2D7; padding: 6px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .empty-state { padding: 45px 20px; text-align: center; color: #747D76; }
+    .empty-state h3 { color: #252B2A; margin-bottom: 8px; }
+    @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .stats-grid { grid-template-columns: 1fr; } .page-heading h1 { font-size: 29px; } .container { margin-top: 28px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <div class="page-heading">
+            <h1>My Earnings</h1>
+            <p>Track your completed sales, FarmSetu commission and cash collections.</p>
+        </div>
+        <div class="commission-note">FarmSetu charges a commission of <strong>4.5%</strong> on completed order items. Your net earnings are calculated after deducting this commission.</div>
+        <section class="stats-grid">
+            <div class="stat-card"><p>Total Completed Sales</p><h2>₹{{ total_sales|floatformat:2 }}</h2><small>Value of completed order items</small></div>
+            <div class="stat-card"><p>FarmSetu Commission</p><h2>₹{{ total_commission|floatformat:2 }}</h2><small>4.5% commission</small></div>
+            <div class="stat-card"><p>Net Earnings</p><h2>₹{{ net_earnings|floatformat:2 }}</h2><small>Sales minus commission</small></div>
+            <div class="stat-card"><p>Cash Collected</p><h2>₹{{ cash_collected|floatformat:2 }}</h2><small>Cash confirmed by you</small></div>
+            <div class="stat-card"><p>Cash Collection Pending</p><h2>₹{{ cash_pending|floatformat:2 }}</h2><small>Completed orders awaiting cash confirmation</small></div>
+            <div class="stat-card"><p>Completed Order Items</p><h2>{{ completed_items.count }}</h2><small>Successfully completed items</small></div>
+        </section>
+        <h2 class="section-title">Earnings History</h2>
+        <div class="table-wrapper">
+            {% if completed_items %}
+            <table>
+                <thead><tr><th>Order</th><th>Date</th><th>Crop</th><th>Sales</th><th>Commission</th><th>Net Amount</th><th>Cash Status</th></tr></thead>
+                <tbody>
+                    {% for item in completed_items %}
+                    <tr>
+                        <td>#{{ item.order.id }}</td>
+                        <td>{{ item.order.created_at|date:"d M Y" }}</td>
+                        <td>{{ item.crop_name }}</td>
+                        <td>₹{{ item.total_price|floatformat:2 }}</td>
+                        <td>₹{{ item.commission_amount|floatformat:2 }}</td>
+                        <td>₹{{ item.net_amount|floatformat:2 }}</td>
+                        <td>{% if item.payment_status == "PAID" %}<span class="paid">Cash Received</span>{% else %}<span class="pending">Pending</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state"><h3>No earnings yet</h3><p>Your completed sales will appear here.</p></div>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}

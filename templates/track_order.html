@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Track Order | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    :root { --green: #236B45; --light-green: #73A942; --cream: #FAF9F3; --dark: #252B2A; --muted: #747D76; --border: #E7E9E1; --white: #FFFFFF; }
+    .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+    .back-link { color: var(--green); text-decoration: none; font-weight: 600; }
+    .heading { margin-bottom: 25px; }
+    .heading h1 { font-family: 'Playfair Display', serif; font-size: 34px; margin-bottom: 8px; color: var(--green); }
+    .heading p { color: var(--muted); }
+    .order-summary { background: var(--green); color: white; border-radius: 17px; padding: 25px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; box-shadow: 0 12px 30px rgba(35,107,69,0.25); }
+    .summary-label { font-size: 13px; opacity: .8; margin-bottom: 7px; }
+    .summary-value { font-size: 18px; font-weight: 700; }
+    .item-card { background: white; border: 1px solid var(--border); border-radius: 17px; padding: 25px; margin-bottom: 22px; box-shadow: 0 2px 8px rgba(30,65,40,0.06); }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px; }
+    .item-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 6px; color: var(--green); }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .status-badge { padding: 8px 13px; border-radius: 20px; background: #EDF4E9; color: var(--green); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .cancelled-badge { background: #FCE9E7; color: #B42318; }
+    .timeline { display: flex; align-items: flex-start; margin: 32px 0; }
+    .step { flex: 1; position: relative; text-align: center; min-width: 0; }
+    .step:not(:last-child)::after { content: ""; position: absolute; height: 3px; background: var(--border); width: 100%; left: 50%; top: 15px; z-index: 0; }
+    .step.done:not(:last-child)::after { background: var(--light-green); }
+    .circle { width: 32px; height: 32px; margin: 0 auto 10px; border-radius: 50%; background: #E9ECE7; color: var(--muted); display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; font-size: 13px; font-weight: 700; }
+    .step.done .circle { background: var(--green); color: white; }
+    .step-label { font-size: 12px; color: var(--muted); font-weight: 600; line-height: 1.4; }
+    .step.done .step-label { color: var(--green); }
+    .cancelled-message { background: #FCE9E7; color: #B42318; padding: 15px; border-radius: 10px; font-size: 14px; margin: 20px 0; }
+    .delivery-info { background: #F5F7EF; padding: 17px; border-radius: 12px; margin-top: 20px; font-size: 14px; line-height: 1.8; }
+    .delivery-info strong { color: var(--green); }
+    .payment-info { border-top: 1px solid var(--border); padding-top: 17px; margin-top: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px; }
+    .empty-state { background: white; border-radius: 15px; padding: 40px; text-align: center; color: var(--muted); }
+    @media(max-width: 650px) { .container { margin-top: 25px; } .heading h1 { font-size: 28px; } .order-summary { grid-template-columns: 1fr 1fr; } .item-card { padding: 18px; } .timeline { margin: 25px -5px; } .circle { width: 27px; height: 27px; font-size: 11px; } .step:not(:last-child)::after { top: 12px; } .step-label { font-size: 10px; } .item-header { flex-direction: column; } }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <div class="heading">
+            <h1>Track Your Order</h1>
+            <p>Follow your fresh produce from the farm to your family.</p>
+        </div>
+        <section class="order-summary">
+            <div><p class="summary-label">Order Number</p><p class="summary-value">#{{ order.id }}</p></div>
+            <div><p class="summary-label">Order Date</p><p class="summary-value">{{ order.created_at|date:"d M Y" }}</p></div>
+            <div><p class="summary-label">Order Total</p><p class="summary-value">₹{{ order.total_amount|floatformat:2 }}</p></div>
+        </section>
+        {% for item in items %}
+        <section class="item-card">
+            <div class="item-header">
+                <div>
+                    <h2>{{ item.crop_name }}</h2>
+                    <p class="muted">Farmer: {{ item.farmer.farm_name|default:item.farmer.username }}<br>Quantity: {{ item.quantity }} {{ item.get_unit_display }}<br>Item total: ₹{{ item.total_price|floatformat:2 }}</p>
+                </div>
+                <span class="status-badge {% if item.status == 'CANCELLED' %}cancelled-badge{% endif %}">{{ item.get_status_display }}</span>
+            </div>
+            {% if item.status == "CANCELLED" %}
+                <div class="cancelled-message"><strong>Order item cancelled.</strong> This crop item will not be fulfilled.</div>
+            {% else %}
+                {% if item.order.delivery_method == "PICKUP" %}
+                    {% with current_status=item.status %}
+                    <div class="timeline">
+                        <div class="step done"><div class="circle">✓</div><div class="step-label">Placed</div></div>
+                        <div class="step {% if current_status != 'PENDING' %}done{% endif %}"><div class="circle">{% if current_status != 'PENDING' %}✓{% else %}2{% endif %}</div><div class="step-label">Confirmed</div></div>
+                        <div class="step {% if current_status == 'PREPARING' or current_status == 'READY' or current_status == 'COMPLETED' %}done{% endif %}"><div class="circle">{% if current_status == 'PREPARING' or current_status == 'READY' or current_status == 'COMPLETED' %}✓{% else %}3{% endif %}</div><div class="step-label">Preparing</div></div>
+                        <div class="step {% if current_status == 'READY' or current_status == 'COMPLETED' %}done{% endif %}"><div class="circle">{% if current_status == 'READY' or current_status == 'COMPLETED' %}✓{% else %}4{% endif %}</div><div class="step-label">Ready for Pickup</div></div>
+                        <div class="step {% if current_status == 'COMPLETED' %}done{% endif %}"><div class="circle">{% if current_status == 'COMPLETED' %}✓{% else %}5{% endif %}</div><div class="step-label">Completed</div></div>
+                    </div>
+                    {% endwith %}
+                {% else %}
+                    <div class="timeline">
+                        <div class="step done"><div class="circle">✓</div><div class="step-label">Placed</div></div>
+                        <div class="step {% if item.status != 'PENDING' %}done{% endif %}"><div class="circle">{% if item.status != 'PENDING' %}✓{% else %}2{% endif %}</div><div class="step-label">Confirmed</div></div>
+                        <div class="step {% if item.status == 'PREPARING' or item.status == 'OUT_FOR_DELIVERY' or item.status == 'COMPLETED' %}done{% endif %}"><div class="circle">{% if item.status == 'PREPARING' or item.status == 'OUT_FOR_DELIVERY' or item.status == 'COMPLETED' %}✓{% else %}3{% endif %}</div><div class="step-label">Preparing</div></div>
+                        <div class="step {% if item.status == 'OUT_FOR_DELIVERY' or item.status == 'COMPLETED' %}done{% endif %}"><div class="circle">{% if item.status == 'OUT_FOR_DELIVERY' or item.status == 'COMPLETED' %}✓{% else %}4{% endif %}</div><div class="step-label">Out for Delivery</div></div>
+                        <div class="step {% if item.status == 'COMPLETED' %}done{% endif %}"><div class="circle">{% if item.status == 'COMPLETED' %}✓{% else %}5{% endif %}</div><div class="step-label">Completed</div></div>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div class="delivery-info">
+                <strong>Fulfilment:</strong> {{ item.order.get_delivery_method_display }}<br>
+                {% if item.order.delivery_method == "PICKUP" %}Please check with the farmer for pickup arrangements.{% else %}Your delivery will be arranged using the delivery details provided at checkout.{% endif %}
+            </div>
+            <div class="payment-info">
+                <span><strong>Payment:</strong> {{ item.order.get_payment_method_display }}</span>
+                <span><strong>Payment status:</strong> {{ item.get_payment_status_display }}</span>
+            </div>
+        </section>
+        {% empty %}
+        <div class="empty-state"><h3>No order items found</h3><p>There are no items available for this order.</p></div>
+        {% endfor %}
+    </main>
+{% endblock %}

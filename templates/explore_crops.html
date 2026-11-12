@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Explore Fresh Crops | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 1200px; margin: 35px auto; padding: 0 22px; }
+    .heading h1 { font-family: 'Playfair Display', serif; color: #236B45; font-size: 34px; margin-bottom: 8px; }
+    .heading p { color: #777; }
+    .filters { background: white; padding: 22px; border-radius: 15px; margin: 28px 0; display: flex; flex-wrap: wrap; gap: 14px; align-items: end; border: 1px solid #EAECE4; box-shadow: 0 2px 8px rgba(30,65,40,0.06); }
+    .filter-group { flex: 1; min-width: 160px; }
+    .filter-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #DDE2D9; border-radius: 8px; font: inherit; background: white; }
+    .filter-button { background: #236B45; color: white; border: none; padding: 13px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .filter-button:hover { background: #185535; }
+    .results-info { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 25px 0 18px; flex-wrap: wrap; }
+    .results-info h2 { font-family: 'Playfair Display', serif; font-size: 23px; }
+    .results-info span { color: #777; font-size: 14px; }
+    .crop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .crop-card { background: white; border: 1px solid #EAECE4; border-radius: 15px; overflow: hidden; transition: transform .2s, box-shadow .2s; box-shadow: 0 2px 8px rgba(30,65,40,0.06); }
+    .crop-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(30,65,40,0.1); }
+    .crop-image { width: 100%; height: 205px; object-fit: cover; background: #EEF4E8; }
+    .no-image { height: 205px; display: flex; align-items: center; justify-content: center; background: #EEF4E8; color: #236B45; font-size: 45px; }
+    .crop-details { padding: 20px; }
+    .category { color: #73A942; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .crop-details h3 { font-size: 20px; margin: 7px 0; }
+    .description { color: #777; font-size: 14px; min-height: 40px; line-height: 1.5; }
+    .price { color: #236B45; font-size: 22px; font-weight: 700; margin: 14px 0 7px; }
+    .price small { font-size: 13px; color: #777; font-weight: 500; }
+    .stock, .farmer, .distance { font-size: 13px; color: #68736D; margin-top: 7px; }
+    .cart-form { margin-top: 18px; padding-top: 15px; border-top: 1px solid #EAECE4; }
+    .cart-form label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+    .cart-form input { margin-bottom: 12px; }
+    .add-cart-button { width: 100%; padding: 13px; background: #236B45; color: white; border: none; border-radius: 9px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .add-cart-button:hover { background: #185535; }
+    .empty { background: white; text-align: center; padding: 55px 20px; border-radius: 15px; border: 1px solid #EAECE4; }
+    .empty h3 { color: #236B45; margin-bottom: 10px; }
+    .empty p { color: #777; line-height: 1.6; }
+    .location-button { display: inline-block; margin-top: 18px; background: #236B45; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+    @media(max-width: 850px) { .crop-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width: 600px) { .crop-grid { grid-template-columns: 1fr; } .heading h1 { font-size: 27px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <section class="heading">
+            <h1>Fresh From Local Farms 🌱</h1>
+            <p>Discover fresh produce directly from farmers near you.</p>
+        </section>
+
+        {% if not has_location %}
+            <div class="empty" style="margin-top:30px;">
+                <h3>📍 Set Your Location First</h3>
+                <p>We need your location to find farmers near you.<br>Save your address and GPS coordinates to explore nearby crops.</p>
+                <a href="{% url 'customer_location' %}" class="location-button">Set My Location</a>
+            </div>
+        {% else %}
+            <form method="GET" class="filters">
+                <div class="filter-group">
+                    <label for="q">Search crops</label>
+                    <input type="search" id="q" name="q" placeholder="e.g. Tomato, Onion" value="{{ search_query }}">
+                </div>
+                <div class="filter-group">
+                    <label for="category">Category</label>
+                    <select name="category" id="category">
+                        <option value="">All Categories</option>
+                        {% for key, value in categories %}
+                            <option value="{{ key }}" {% if selected_category == key %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="radius">Search Radius</label>
+                    <select name="radius" id="radius">
+                        <option value="5" {% if radius == 5 %}selected{% endif %}>5 km</option>
+                        <option value="10" {% if radius == 10 %}selected{% endif %}>10 km</option>
+                        <option value="15" {% if radius == 15 %}selected{% endif %}>15 km</option>
+                        <option value="20" {% if radius == 20 %}selected{% endif %}>20 km</option>
+                        <option value="30" {% if radius == 30 %}selected{% endif %}>30 km</option>
+                    </select>
+                </div>
+                <button type="submit" class="filter-button">Find Crops</button>
+            </form>
+
+            <div class="results-info">
+                <h2>Available Near You</h2>
+                <span>{{ result_count }} crop listing(s) within {{ radius }} km</span>
+            </div>
+
+            {% if nearby_crops %}
+                <section class="crop-grid">
+                    {% for item in nearby_crops %}
+                        <article class="crop-card">
+                            {% if item.crop.image %}
+                                <img class="crop-image" src="{{ item.crop.image.url }}" alt="{{ item.crop.name }}">
+                            {% else %}
+                                <div class="no-image">🌾</div>
+                            {% endif %}
+                            <div class="crop-details">
+                                <div class="category">{{ item.crop.get_category_display }}</div>
+                                <h3>{{ item.crop.name }}</h3>
+                                <p class="description">{{ item.crop.description|default:"Fresh farm produce."|truncatewords:15 }}</p>
+                                <div class="price">₹{{ item.crop.price }} <small>/ {% if item.crop.unit == "KG" %}kg{% else %}100 g{% endif %}</small></div>
+                                <div class="stock">Available stock: {{ item.crop.quantity }} {% if item.crop.unit == "KG" %}kg{% else %}g{% endif %}</div>
+                                <div class="farmer">👨‍🌾 Farmer: {{ item.crop.farmer.username }}</div>
+                                <div class="distance">📍 {{ item.distance }} km away</div>
+                                <form method="POST" action="{% url 'add_to_cart' item.crop.id %}" class="cart-form">
+                                    {% csrf_token %}
+                                    <label>Quantity ({% if item.crop.unit == "G" %}grams{% else %}kg{% endif %})</label>
+                                    <input type="number" name="quantity" value="{% if item.crop.unit == 'G' %}100{% else %}1{% endif %}" min="1" step="1" max="{{ item.crop.quantity }}" required>
+                                    <button type="submit" class="add-cart-button">🛒 Add to Cart</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </section>
+            {% else %}
+                <div class="empty">
+                    <h3>No Crops Found Nearby</h3>
+                    <p>There are currently no available crop listings within {{ radius }} km.<br>Try increasing your search radius or changing your search.</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </main>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Farm Location | FarmSetu{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 750px; margin: 45px auto; padding: 0 20px; }
+    .card { background: white; border: 1px solid #EAECE4; border-radius: 18px; padding: 35px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+    h1 { font-family: 'Playfair Display', serif; color: #236B45; font-size: 32px; margin-bottom: 9px; }
+    .subtitle { color: #888; font-size: 14px; line-height: 1.6; margin-bottom: 27px; }
+    .section-heading { font-size: 17px; margin: 25px 0 15px; color: #236B45; font-weight: 700; }
+    .field { margin-bottom: 17px; }
+    label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+    input { width: 100%; padding: 13px; border: 1px solid #DDE3D9; border-radius: 9px; font-family: inherit; font-size: 14px; transition: border-color .2s, box-shadow .2s; }
+    input:focus { outline: none; border-color: #236B45; box-shadow: 0 0 0 3px rgba(35,107,69,0.08); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .gps-button { width: 100%; background: #EAF3E8; border: 1px solid #B9D5B5; color: #236B45; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: background .2s; }
+    .gps-button:hover { background: #DDEED9; }
+    .gps-status { margin-top: 10px; font-size: 13px; color: #666; line-height: 1.5; }
+    .privacy { background: #F0F5EC; padding: 15px; border-radius: 10px; color: #456444; font-size: 12px; line-height: 1.6; margin-top: 20px; }
+    .save-button { width: 100%; margin-top: 25px; padding: 15px; border: none; border-radius: 9px; background: #236B45; color: white; font-weight: 700; font-size: 15px; cursor: pointer; transition: background .2s; }
+    .save-button:hover { background: #174d30; }
+    .message { padding: 12px; border-radius: 8px; margin-bottom: 15px; background: #E5F5E9; color: #237342; font-size: 13px; }
+    @media(max-width: 550px) { .card { padding: 23px 18px; } .grid { grid-template-columns: 1fr; gap: 0; } h1 { font-size: 27px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <main class="container">
+        <div class="card">
+            <h1>Your Farm Location 📍</h1>
+            <p class="subtitle">Add your farm location so nearby customers can discover your fresh produce.</p>
+            {% if messages %}{% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}{% endif %}
+            <form method="POST" id="locationForm">
+                {% csrf_token %}
+                <h2 class="section-heading">Option 1 — Use GPS</h2>
+                <button type="button" class="gps-button" id="gpsButton">📍 Use My Current Location</button>
+                <p class="gps-status" id="gpsStatus">Click the button and allow browser location permission.</p>
+                <h2 class="section-heading">Option 2 — Enter Address Manually</h2>
+                <div class="field">
+                    <label for="village">Village / Town *</label>
+                    <input type="text" id="village" name="village" value="{{ request.user.village }}" placeholder="Enter village or town" required>
+                </div>
+                <div class="grid">
+                    <div class="field">
+                        <label for="mandal">Mandal *</label>
+                        <input type="text" id="mandal" name="mandal" value="{{ request.user.mandal }}" placeholder="Enter mandal" required>
+                    </div>
+                    <div class="field">
+                        <label for="district">District *</label>
+                        <input type="text" id="district" name="district" value="{{ request.user.district }}" placeholder="Enter district" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="pincode">Pincode *</label>
+                    <input type="text" id="pincode" name="pincode" value="{{ request.user.pincode }}" placeholder="6-digit pincode" pattern="[0-9]{6}" maxlength="6" required>
+                </div>
+                <input type="hidden" name="latitude" id="latitude" value="{{ request.user.latitude|default_if_none:'' }}">
+                <input type="hidden" name="longitude" id="longitude" value="{{ request.user.longitude|default_if_none:'' }}">
+                <div class="privacy">🔒 <strong>Your privacy matters.</strong> Your exact GPS coordinates will not be displayed publicly. FarmSetu will use them for nearby-crop discovery and distance calculations.</div>
+                <button type="submit" class="save-button">Save Farm Location</button>
+            </form>
+        </div>
+    </main>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const gpsButton = document.getElementById("gpsButton");
+    const gpsStatus = document.getElementById("gpsStatus");
+    gpsButton.addEventListener("click", function () {
+        if (!navigator.geolocation) { gpsStatus.textContent = "GPS is not supported by this browser."; return; }
+        gpsStatus.textContent = "Getting your location...";
+        gpsButton.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                document.getElementById("latitude").value = position.coords.latitude;
+                document.getElementById("longitude").value = position.coords.longitude;
+                gpsStatus.textContent = "✓ GPS location captured successfully.";
+                gpsButton.disabled = false;
+            },
+            function (error) {
+                const messages = { 1: "Location permission denied. You can enter your address manually.", 2: "Location is currently unavailable. Please try again.", 3: "Location request timed out. Please try again." };
+                gpsStatus.textContent = messages[error.code] || "Unable to get location.";
+                gpsButton.disabled = false;
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    });
+</script>
+{% endblock %}

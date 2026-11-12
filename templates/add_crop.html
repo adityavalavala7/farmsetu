@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Add Crop | FarmSetu{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<style>
+    .add-crop-page { background: #f6f8f2; min-height: calc(100vh - 160px); padding: 45px 20px; }
+    .crop-container { max-width: 850px; margin: auto; }
+    .crop-heading { margin-bottom: 28px; }
+    .crop-heading h1 { color: #236B45; font-size: 32px; margin-bottom: 8px; font-family: 'Playfair Display', serif; }
+    .crop-heading p { color: #68736a; }
+    .crop-form-card { background: white; padding: 35px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); border: 1px solid #e8eadf; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { color: #283b30; font-weight: 600; font-size: 14px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 13px 14px; border: 1px solid #dce3da; border-radius: 9px; font-size: 14px; background: #fff; box-sizing: border-box; outline: none; transition: border-color .2s, box-shadow .2s; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #236B45; box-shadow: 0 0 0 3px rgba(35,107,69,0.09); }
+    .form-group input[type="file"] { padding: 12px; }
+    .field-help { color: #7b857c; font-size: 12px; }
+    .price-note { background: #f0f7ed; color: #356b43; padding: 13px 15px; border-radius: 9px; font-size: 13px; margin: 22px 0; }
+    .crop-preview { display: none; max-width: 220px; max-height: 180px; object-fit: cover; border-radius: 10px; margin-top: 10px; }
+    .submit-crop-btn { width: 100%; padding: 15px; background: #236B45; color: white; border: none; border-radius: 9px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 25px; transition: background .2s; }
+    .submit-crop-btn:hover { background: #195537; }
+    .back-link { display: inline-block; margin-bottom: 22px; color: #236B45; text-decoration: none; font-weight: 600; }
+    .form-errors { background: #fff0ef; color: #a52b25; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+    @media(max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .crop-form-card { padding: 22px; } .crop-heading h1 { font-size: 26px; } }
+</style>
+{% endblock %}
+{% block content %}
+    <div class="add-crop-page">
+        <div class="crop-container">
+            <a href="{% url 'farmer_dashboard' %}" class="back-link">← Back to Dashboard</a>
+            <div class="crop-heading">
+                <h1>Add a New Crop 🌱</h1>
+                <p>List your fresh farm produce and connect directly with customers.</p>
+            </div>
+            <div class="crop-form-card">
+                {% if messages %}
+                    {% for message in messages %}<div class="price-note">{{ message }}</div>{% endfor %}
+                {% endif %}
+                {% if form.errors %}
+                    <div class="form-errors">Please correct the errors below. {{ form.errors }}</div>
+                {% endif %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}">Crop Name *</label>
+                            {{ form.name }}{{ form.name.errors }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.category.id_for_label }}">Category *</label>
+                            {{ form.category }}{{ form.category.errors }}
+                        </div>
+                        <div class="form-group full">
+                            <label for="{{ form.description.id_for_label }}">Crop Description</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.price.id_for_label }}">Price (₹) *</label>
+                            {{ form.price }}
+                            <span class="field-help">Enter the price for the selected pricing unit below.</span>
+                            {{ form.price.errors }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.unit.id_for_label }}">Pricing Unit *</label>
+                            {{ form.unit }}
+                            <span class="field-help">KG = per kg | Grams = per 100 grams</span>
+                            {{ form.unit.errors }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.quantity.id_for_label }}">Available Quantity *</label>
+                            {{ form.quantity }}{{ form.quantity.errors }}
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity Unit</label>
+                            <input type="text" id="quantity-unit-display" value="kg" readonly>
+                            <span class="field-help">Automatically follows your selected unit.</span>
+                        </div>
+                        <div class="form-group full">
+                            <label for="{{ form.image.id_for_label }}">Crop Photograph</label>
+                            {{ form.image }}
+                            <span class="field-help">Upload a clear photograph of your actual crop.</span>
+                            <img id="image-preview" class="crop-preview" alt="Crop preview">
+                            {{ form.image.errors }}
+                        </div>
+                    </div>
+                    <div class="price-note" id="price-note">Enter your selling price per kilogram.</div>
+                    <button type="submit" class="submit-crop-btn">Add Crop to FarmSetu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    const unitSelect = document.getElementById("id_unit");
+    const priceNote = document.getElementById("price-note");
+    const quantityUnit = document.getElementById("quantity-unit-display");
+    function updateUnitInfo() {
+        if (unitSelect.value === "KG") {
+            priceNote.textContent = "Enter your selling price per kilogram.";
+            quantityUnit.value = "kg";
+        } else {
+            priceNote.textContent = "Enter your selling price per 100 grams.";
+            quantityUnit.value = "grams";
+        }
+    }
+    unitSelect.addEventListener("change", updateUnitInfo);
+    updateUnitInfo();
+    const imageInput = document.getElementById("id_image");
+    const imagePreview = document.getElementById("image-preview");
+    imageInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) { imagePreview.src = URL.createObjectURL(file); imagePreview.style.display = "block"; }
+        else { imagePreview.style.display = "none"; imagePreview.removeAttribute("src"); }
+    });
+</script>
+{% endblock %}
